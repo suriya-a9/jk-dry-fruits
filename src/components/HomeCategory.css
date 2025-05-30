@@ -1,0 +1,10 @@
+.home-categories .overflow-auto::-webkit-scrollbar {
+    display: none;
+}
+
+.home-categories .overflow-auto {
+    -ms-overflow-style: none;
+
+    scrollbar-width: none;
+
+}
