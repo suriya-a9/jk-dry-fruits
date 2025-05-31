@@ -6,6 +6,9 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 import { Navigation } from "swiper/modules";
 import { FaRegHeart, FaHeart } from "react-icons/fa6";
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import "swiper/css";
 import "swiper/css/navigation";
 import "./FeaturedProducts.css";
@@ -46,7 +49,7 @@ export default function FeaturedProducts() {
     const toggleWishlist = async (productId) => {
         const token = localStorage.getItem('token');
         if (!token) {
-            alert("Please login to use wishlist");
+            toast.info("Please login to use wishlist");
             return;
         }
 
@@ -65,8 +68,10 @@ export default function FeaturedProducts() {
 
         if (isWishlisted) {
             setWishlist(wishlist.filter(id => id !== productId));
+            toast.success("Removed from wishlist");
         } else {
             setWishlist([...wishlist, productId]);
+            toast.success("Added to wishlist");
         }
     };
 
@@ -80,14 +85,14 @@ export default function FeaturedProducts() {
     const handleAddToCart = async (product) => {
         const token = localStorage.getItem('token');
         if (!token) {
-            alert("Please login to add to cart");
+            toast.info("Please login to add to cart");
             return;
         }
 
         const variationId = selectedVariations[product._id];
         console.log('Received variationId:', variationId);
         if (variationId && !mongoose.Types.ObjectId.isValid(variationId)) {
-            alert('Invalid variation selected.');
+            toast.error("Invalid variation selected.");
             return;
         }
 
@@ -111,9 +116,9 @@ export default function FeaturedProducts() {
             const data = await res.json();
 
             if (res.ok) {
-                alert('Item added to cart!');
+                toast.success("Item added to cart!");
             } else {
-                alert(data.error || 'Failed to add to cart');
+                toast.error(data.error || 'Failed to add to cart');
             }
         } catch (err) {
             console.error('Error adding to cart:', err);
@@ -122,102 +127,105 @@ export default function FeaturedProducts() {
     };
 
     return (
-        <section className="featured-products py-5" style={{ background: "white" }} id="oderProducts">
-            <div className="container">
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h2 style={{ color: "red", fontWeight: "bold" }}>Featured Products</h2>
+        <>
+            <section className="featured-products py-5" style={{ background: "white" }} id="oderProducts">
+                <div className="container">
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <h2 style={{ color: "red", fontWeight: "bold" }}>Featured Products</h2>
 
-                    <div className="d-flex gap-2">
-                        <div className="swiper-button-prev-custom btn btn-light rounded-circle shadow-sm" style={{ width: "40px", height: "40px" }}>
-                            <span style={{ fontSize: "20px" }}><IoIosArrowBack style={{ color: '#EF2231' }} /></span>
-                        </div>
-                        <div className="swiper-button-next-custom btn btn-light rounded-circle shadow-sm" style={{ width: "40px", height: "40px" }}>
-                            <span style={{ fontSize: "20px" }}><IoIosArrowForward style={{ color: '#EF2231' }} /></span>
+                        <div className="d-flex gap-2">
+                            <div className="swiper-button-prev-custom btn btn-light rounded-circle shadow-sm" style={{ width: "40px", height: "40px" }}>
+                                <span style={{ fontSize: "20px" }}><IoIosArrowBack style={{ color: '#EF2231' }} /></span>
+                            </div>
+                            <div className="swiper-button-next-custom btn btn-light rounded-circle shadow-sm" style={{ width: "40px", height: "40px" }}>
+                                <span style={{ fontSize: "20px" }}><IoIosArrowForward style={{ color: '#EF2231' }} /></span>
+                            </div>
                         </div>
                     </div>
+
+                    <Swiper
+                        slidesPerView={4}
+                        spaceBetween={20}
+                        navigation={{
+                            nextEl: ".swiper-button-next-custom",
+                            prevEl: ".swiper-button-prev-custom",
+                        }}
+                        modules={[Navigation]}
+                        className="mySwiper"
+                        breakpoints={{
+                            320: { slidesPerView: 1 },
+                            768: { slidesPerView: 2 },
+                            992: { slidesPerView: 3 },
+                            1200: { slidesPerView: 4 },
+                        }}
+                    >
+                        {products.map((product) => (
+                            <SwiperSlide key={product._id}>
+                                <div className="card position-relative p-3 rounded-4 text-center" style={{ background: "white", borderBottom: '3px solid black', placeItems: "center", width: '100%', boxShadow: ' rgba(0, 0, 0, 0.24) 0px 3px 8px' }}>
+
+                                    <div className="badge position-absolute" style={{ top: "15px", left: "15px", backgroundColor: '#C6A270', color: 'white' }}>
+                                        New
+                                    </div>
+
+                                    <div
+                                        className="position-absolute"
+                                        style={{ top: "15px", right: "15px", fontSize: "20px", color: "red", cursor: "pointer" }}
+                                        onClick={() => toggleWishlist(product._id)}
+                                    >
+                                        {wishlist.includes(product._id) ? <FaHeart /> : <FaRegHeart />}
+                                    </div>
+
+
+                                    <img
+                                        src={product.image}
+                                        alt={product.name}
+                                        className="rounded-circle mx-auto d-block my-3"
+                                        style={{ width: "120px", height: "120px", objectFit: "cover" }}
+                                    />
+
+                                    <h5 className="mt-2" style={{ color: 'black', fontSize: '18px', fontWeight: 'bold' }}>{product.name}</h5>
+
+                                    {product.variations && product.variations.length > 0 ? (
+                                        <div className="my-3 w-75 mx-auto text-center">
+                                            <label style={{ fontSize: "14px", fontWeight: "bold", marginBottom: "5px", display: "block" }}>
+                                                Select Weight:
+                                            </label>
+                                            <select
+                                                className="form-select"
+                                                value={selectedVariations[product._id] || ''}
+                                                onChange={(e) => handleVariationChange(product._id, e.target.value)}
+                                            >
+                                                <option value="">Select weight</option>
+                                                {product.variations.map((variation, index) => (
+                                                    <option key={index} value={variation._id} className="text-center">
+                                                        {variation.weight} {variation.weightUnit?.label} - ₹{variation.price}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    ) : (
+                                        <div className="my-3 w-75 mx-auto text-center">
+                                            <p style={{ fontSize: "14px", margin: '20px 0px' }}>
+                                                Price : {''}<strong>₹{product.price}</strong>
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    <button
+                                        className="btn btn-danger w-75"
+                                        style={{ borderRadius: '5px', margin: '20px 0px' }}
+                                        onClick={() => handleAddToCart(product)}
+                                    >
+                                        Add To Cart
+                                    </button>
+
+                                </div>
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
                 </div>
-
-                <Swiper
-                    slidesPerView={4}
-                    spaceBetween={20}
-                    navigation={{
-                        nextEl: ".swiper-button-next-custom",
-                        prevEl: ".swiper-button-prev-custom",
-                    }}
-                    modules={[Navigation]}
-                    className="mySwiper"
-                    breakpoints={{
-                        320: { slidesPerView: 1 },
-                        768: { slidesPerView: 2 },
-                        992: { slidesPerView: 3 },
-                        1200: { slidesPerView: 4 },
-                    }}
-                >
-                    {products.map((product) => (
-                        <SwiperSlide key={product._id}>
-                            <div className="card position-relative p-3 rounded-4 text-center" style={{ background: "white", borderBottom: '3px solid black', placeItems: "center", width: '100%', boxShadow: ' rgba(0, 0, 0, 0.24) 0px 3px 8px' }}>
-
-                                <div className="badge position-absolute" style={{ top: "15px", left: "15px", backgroundColor: '#C6A270', color: 'white' }}>
-                                    New
-                                </div>
-
-                                <div
-                                    className="position-absolute"
-                                    style={{ top: "15px", right: "15px", fontSize: "20px", color: "red", cursor: "pointer" }}
-                                    onClick={() => toggleWishlist(product._id)}
-                                >
-                                    {wishlist.includes(product._id) ? <FaHeart /> : <FaRegHeart />}
-                                </div>
-
-
-                                <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="rounded-circle mx-auto d-block my-3"
-                                    style={{ width: "120px", height: "120px", objectFit: "cover" }}
-                                />
-
-                                <h5 className="mt-2" style={{ color: 'black', fontSize: '18px', fontWeight: 'bold' }}>{product.name}</h5>
-
-                                {product.variations && product.variations.length > 0 ? (
-                                    <div className="my-3 w-75 mx-auto text-center">
-                                        <label style={{ fontSize: "14px", fontWeight: "bold", marginBottom: "5px", display: "block" }}>
-                                            Select Weight:
-                                        </label>
-                                        <select
-                                            className="form-select"
-                                            value={selectedVariations[product._id] || ''}
-                                            onChange={(e) => handleVariationChange(product._id, e.target.value)}
-                                        >
-                                            <option value="">Select weight</option>
-                                            {product.variations.map((variation, index) => (
-                                                <option key={index} value={variation._id} className="text-center">
-                                                    {variation.weight} {variation.weightUnit?.label} - ₹{variation.price}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                ) : (
-                                    <div className="my-3 w-75 mx-auto text-center">
-                                        <p style={{ fontSize: "14px", margin: '20px 0px' }}>
-                                            Price : {''}<strong>₹{product.price}</strong>
-                                        </p>
-                                    </div>
-                                )}
-
-                                <button
-                                    className="btn btn-danger w-75"
-                                    style={{ borderRadius: '5px', margin: '20px 0px' }}
-                                    onClick={() => handleAddToCart(product)}
-                                >
-                                    Add To Cart
-                                </button>
-
-                            </div>
-                        </SwiperSlide>
-                    ))}
-                </Swiper>
-            </div>
-        </section>
+            </section>
+            <ToastContainer position="top-right" />
+        </>
     );
 }

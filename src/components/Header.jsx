@@ -1,12 +1,15 @@
 'use client';
 
 import { Container, Nav, Navbar, Form, Button, InputGroup, Modal, Offcanvas } from 'react-bootstrap';
-import { FaHeart, FaShoppingCart, FaSearch, FaTrashAlt } from 'react-icons/fa';
+import { FaHeart, FaShoppingCart, FaSearch, FaTrashAlt, FaBars, FaUser } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { FaWeightHanging } from 'react-icons/fa6';
 import { Dropdown } from 'react-bootstrap';
 import { FaUserCircle } from 'react-icons/fa';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 function Header() {
     const pathname = usePathname();
@@ -26,7 +29,14 @@ function Header() {
     const [searchResults, setSearchResults] = useState([]);
     const [selectedVariations, setSelectedVariations] = useState({});
     const [isHeartActive, setIsHeartActive] = useState(false);
-
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
+    const [showMobileSearch, setShowMobileSearch] = useState(false);
+    const [mobileQuery, setMobileQuery] = useState('');
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+        }
+    }, [error]);
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
@@ -201,7 +211,7 @@ function Header() {
                 item.cartItemId === cartItemId ? { ...item, quantity: updatedQuantity } : item
             ));
         } else {
-            alert('Failed to update quantity.');
+            toast.error('Failed to update quantity.');
         }
     };
 
@@ -222,7 +232,7 @@ function Header() {
             setCartItems(cartItems.filter(item => item._id !== cartItemId));
             window.location.reload();
         } else {
-            alert('Failed to remove item from cart.');
+            toast.error('Failed to remove item from cart.');
         }
     };
     const handleVariationChange = (productId, variationId) => {
@@ -234,16 +244,16 @@ function Header() {
     const handleAddToCart = async (product) => {
         const token = localStorage.getItem('token');
         if (!token) {
-            alert("Please login to add to cart");
+            toast.info("Please login to add to cart");
             return;
         }
 
-        // Get selected variation from state
+
         const variationId = selectedVariations[product._id];
 
-        // If product has variations but none selected
+
         if (product.variations?.length > 0 && !variationId) {
-            alert("Please select a variation before adding to cart.");
+            toast.info("Please select a variation before adding to cart.");
             return;
         }
 
@@ -267,22 +277,26 @@ function Header() {
             const data = await res.json();
 
             if (res.ok) {
-                alert('Item added to cart!');
+                toast.success('Item added to cart!');
             } else {
-                alert(data.error || 'Failed to add to cart');
+                toast.error(data.error || 'Failed to add to cart');
             }
         } catch (err) {
             console.error('Error adding to cart:', err);
-            alert('Something went wrong');
+            toast.error('Something went wrong');
         }
     };
 
-    const handleSearch = async (e) => {
+    const handleSearch = async (e, searchText) => {
         e.preventDefault();
-        if (!query.trim()) return;
+
+
+        const finalQuery = searchText !== undefined ? searchText : query;
+
+        if (!finalQuery.trim()) return;
 
         try {
-            const res = await fetch(`/api/products/search?q=${encodeURIComponent(query)}`);
+            const res = await fetch(`/api/products/search?q=${encodeURIComponent(finalQuery)}`);
             const data = await res.json();
             setSearchResults(data.products || []);
             setShowSearchModal(true);
@@ -291,9 +305,10 @@ function Header() {
         }
     };
 
+
     return (
         <>
-            <Navbar expand="lg" className="bg-body-tertiary">
+            <Navbar expand="lg" className="bg-body-tertiary d-none d-md-flex">
                 <Container>
                     <Navbar.Brand href="/">
                         <img src={'/assets/admin/admin-logo.webp'} alt="Logo" height="40" />
@@ -428,6 +443,172 @@ function Header() {
                     </Navbar.Collapse>
                 </Container>
             </Navbar>
+            <div className="d-flex d-lg-none justify-content-between align-items-center px-3 py-2 shadow-sm border-top border-danger position-relative" style={{ height: '100px' }}>
+
+                <div className="d-flex align-items-center" style={{ gap: '25px' }}>
+                    <button
+                        className="btn btn-link p-0 text-dark"
+                        onClick={() => setShowMobileMenu(true)}
+                    >
+                        <FaBars size={22} style={{ cursor: 'pointer', color: 'rgb(108, 117, 125)' }} />
+                    </button>
+
+                    <FaSearch
+                        size={18}
+                        style={{ cursor: 'pointer', color: 'rgb(108, 117, 125)' }}
+                        onClick={() => setShowMobileSearch(prev => !prev)}
+                    />
+
+                    <div className="position-relative">
+                        <FaHeart
+                            size={18}
+                            style={{
+                                color: isHeartActive ? '#F02131' : '#6c757d',
+                                cursor: 'pointer'
+                            }}
+                            onClick={() => {
+                                setIsHeartActive(prev => !prev);
+                                setShowWishlistDropdown(prev => !prev);
+                            }}
+                        />
+                        {showWishlistDropdown && (
+                            <div
+                                className="wishlist-dropdown position-absolute bg-white shadow rounded p-3"
+                                style={{
+                                    top: '30px',
+                                    left: '-100px',
+                                    width: '280px',
+                                    zIndex: 9999
+                                }}
+                            >
+                                {wishlistProducts.length === 0 ? (
+                                    <p className="mb-0 text-center text-muted">Your wishlist is empty.</p>
+                                ) : (
+                                    wishlistProducts.map(product => (
+                                        <div key={product._id} className="d-flex flex-column border-bottom py-2">
+                                            <div className="d-flex align-items-center justify-content-between gap-2">
+                                                <div className="d-flex align-items-center gap-2">
+                                                    <img
+                                                        src={product.image}
+                                                        alt={product.name}
+                                                        style={{
+                                                            width: '40px',
+                                                            height: '40px',
+                                                            objectFit: 'cover',
+                                                            borderRadius: '4px'
+                                                        }}
+                                                    />
+                                                    <div>
+                                                        <small className="fw-bold">{product.name}</small><br />
+                                                        {product.price && <small>₹{product.price}</small>}
+                                                    </div>
+                                                </div>
+                                                <Button
+                                                    variant="outline-danger"
+                                                    size="sm"
+                                                    onClick={() => removeFromWishlist(product._id)}
+                                                >
+                                                    X
+                                                </Button>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                className="mt-2 w-100"
+                                                onClick={() => handleAddToCart(product)}
+                                                style={{ backgroundColor: '#dc3545', border: '1px solid #dc3545', color: 'white' }}
+                                            >
+                                                Add to Cart
+                                            </Button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className="position-absolute top-50 start-50 translate-middle">
+                    <img
+                        src="/assets/admin/admin-logo.webp"
+                        alt="Logo"
+                        height="35"
+                        style={{ objectFit: 'contain' }}
+                    />
+                </div>
+                <div className="d-flex align-items-center" style={{ gap: '40px' }}>
+                    {user ? (
+                        <Dropdown align="end">
+                            <Dropdown.Toggle
+                                variant="link"
+                                bsPrefix="p-0 border-0 bg-transparent"
+                                style={{ boxShadow: 'none' }}
+                            >
+                                <FaUser size={18} style={{ color: 'rgb(108, 117, 125)' }} />
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                                <Dropdown.Item href="/profile">My Profile</Dropdown.Item>
+                                <Dropdown.Divider />
+                                <Dropdown.Item onClick={handleLogout} className="text-danger">Logout</Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    ) : (
+                        <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => setShowModal(true)}
+                            className="text-danger"
+                        >
+                            Login / Signup
+                        </Button>
+                    )}
+                    <a href="/cart" className="position-relative text-dark">
+                        <FaShoppingCart size={18} style={{ color: 'rgb(108, 117, 125)' }} />
+                        {cartItems?.length > 0 && (
+                            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark">
+                                {cartItems.length}
+                            </span>
+                        )}
+                    </a>
+                </div>
+            </div>
+
+            {showMobileSearch && (
+                <div className="px-3 py-2 border-bottom bg-white d-lg-none">
+                    <Form onSubmit={(e) => {
+                        handleSearch(e, mobileQuery);
+                        setShowMobileSearch(false);
+                    }}>
+                        <InputGroup>
+                            <Form.Control
+                                type="text"
+                                placeholder="Search products..."
+                                value={mobileQuery}
+                                onChange={(e) => setMobileQuery(e.target.value)}
+                            />
+                            <Button
+                                variant="outline-secondary"
+                                type="submit"
+                            >
+                                <FaSearch />
+                            </Button>
+
+                        </InputGroup>
+                    </Form>
+                </div>
+            )}
+
+            <Offcanvas show={showMobileMenu} onHide={() => setShowMobileMenu(false)} placement="start">
+                <Offcanvas.Header closeButton>
+                    <Offcanvas.Title>Menu</Offcanvas.Title>
+                </Offcanvas.Header>
+                <Offcanvas.Body>
+                    <Nav className="flex-column">
+                        <Nav.Link href="/" style={{ color: '#EF2231' }}>Shop All</Nav.Link>
+                        <Nav.Link href="/categories" style={{ color: '#EF2231' }}>Categories</Nav.Link>
+                        {/* <Nav.Link href="/wishlist">Wishlist</Nav.Link> */}
+                    </Nav>
+                </Offcanvas.Body>
+            </Offcanvas>
+
             {/* <Offcanvas show={showCartOffcanvas} onHide={() => setShowCartOffcanvas(false)} placement="end">
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Your Cart</Offcanvas.Title>
@@ -513,8 +694,6 @@ function Header() {
                         </p>
                     </div>
 
-                    {error && <div className="alert alert-danger">{error}</div>}
-
                     <Form>
                         {!isLoginView && (
                             <div className="row">
@@ -597,7 +776,7 @@ function Header() {
                         </Button>
 
                         <div className="text-center mt-3">
-                            <Button variant="link" onClick={() => setIsLoginView(!isLoginView)}>
+                            <Button variant="link" onClick={() => setIsLoginView(!isLoginView)} style={{ color: '#EF2231' }}>
                                 {isLoginView ? "Don't have an account? Register" : "Already have an account? Login"}
                             </Button>
                         </div>
@@ -692,6 +871,7 @@ function Header() {
                     <Button variant="secondary" style={{ backgroundColor: '#dc3545', color: 'white', border: 'none !important' }} onClick={() => setShowSearchModal(false)}>Close</Button>
                 </Modal.Footer>
             </Modal>
+            <ToastContainer position="top-right" />
         </>
     );
 }

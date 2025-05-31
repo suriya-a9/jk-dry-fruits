@@ -7,6 +7,9 @@ import { useEffect, useState } from 'react';
 import { Card, Button, Table, Modal, Form } from 'react-bootstrap';
 import { FaTrashAlt } from 'react-icons/fa';
 import { QRCodeCanvas } from 'qrcode.react';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 function CheckoutStep({ subtotal, deliveryCharge, totalAmount, onBack, onPlaceOrder, discountOnOrder }) {
     const [showQR, setShowQR] = useState(false);
@@ -61,7 +64,7 @@ function CheckoutStep({ subtotal, deliveryCharge, totalAmount, onBack, onPlaceOr
 
     const handlePayNow = () => {
         if (!fullName || !doorNo || !addressLine || !city || !state || !pincode || !country) {
-            alert('Please fill Address details before proceeding to payment.');
+            toast.info('Please fill Address details before proceeding to payment.');
             return;
         }
         setShowQR(true);
@@ -69,12 +72,12 @@ function CheckoutStep({ subtotal, deliveryCharge, totalAmount, onBack, onPlaceOr
 
     const handleConfirmPayment = async () => {
         if (!fullName || !doorNo || !addressLine || !city || !state || !pincode || !country || !transactionId || !area) {
-            alert('Please fill all billing details and transaction ID.');
+            toast.info('Please fill all billing details and transaction ID.');
             return;
         }
         const token = localStorage.getItem('token');
         if (!token) {
-            alert('Please login to continue.');
+            toast.info('Please login to continue.');
             return;
         }
         const finalAmount = computeFinalAmount();
@@ -114,15 +117,15 @@ function CheckoutStep({ subtotal, deliveryCharge, totalAmount, onBack, onPlaceOr
 
             const result = await res.json();
             if (res.ok && result.success) {
-                alert('Order placed successfully!');
+                toast.success('Order placed successfully!');
                 setShowQR(false);
                 onPlaceOrder();
             } else {
-                alert('Failed to place order.');
+                toast.error('Failed to place order.');
             }
         } catch (err) {
             console.error(err);
-            alert('An error occurred.');
+            toast.error('An error occurred.');
         }
     };
 
@@ -167,7 +170,7 @@ function CheckoutStep({ subtotal, deliveryCharge, totalAmount, onBack, onPlaceOr
     const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(fullName || 'Recipient')}&am=${upiAmount}&cu=INR&tn=Order%20Payment`;
     const handleCopy = (text) => {
         navigator.clipboard.writeText(text)
-            .then(() => alert('UPI Id copied'))
+            .then(() => toast.success('UPI Id copied'))
             .catch((err) => console.error('Failed to copy text: ', err));
     };
     return (
@@ -301,7 +304,7 @@ function CheckoutStep({ subtotal, deliveryCharge, totalAmount, onBack, onPlaceOr
                 <Modal.Body className='text-center' style={{ placeItems: 'center' }}>
                     <p>Scan the QR code below to pay ₹{upiAmount}</p>
                     <p>
-                        or Pay to this UPI ID <strong>{upiId}&nbsp;</strong><span style={{ cursor: 'pointer' }} onClick={() => handleCopy(upiId)}>(click to copy!)</span>
+                        or Pay to this UPI ID <strong style={{ cursor: 'pointer' }} onClick={() => handleCopy(upiId)}>{upiId}&nbsp;</strong><span style={{ cursor: 'pointer' }} onClick={() => handleCopy(upiId)}>(click to copy!)</span>
                     </p>
                     <QRCodeCanvas value={upiUrl} />
                     <Form.Group className="mt-3">
@@ -318,6 +321,7 @@ function CheckoutStep({ subtotal, deliveryCharge, totalAmount, onBack, onPlaceOr
                     <Button variant='danger' onClick={handleConfirmPayment}>Confirm Payment</Button>
                 </Modal.Footer>
             </Modal>
+            <ToastContainer position="top-right" />
         </>
     );
 }
@@ -385,7 +389,7 @@ export default function CartPage() {
                 item.cartItemId === cartItemId ? { ...item, quantity: updatedQuantity } : item
             ));
         } else {
-            alert('Failed to update quantity.');
+            toast.error('Failed to update quantity.');
         }
     };
     function getDeliveryChargeByWeight(weightInGrams) {
@@ -518,8 +522,9 @@ export default function CartPage() {
 
         if (res.ok) {
             setCartItems(cartItems.filter(item => item.cartItemId !== cartItemId));
+            toast.success('Product removed.');
         } else {
-            alert('Failed to remove item from cart.');
+            toast.error('Failed to remove item from cart.');
         }
     };
 
@@ -564,57 +569,80 @@ export default function CartPage() {
                                 ) : (
                                     <div className="row">
                                         <div className="col-md-8">
-                                            <Table responsive style={{ border: '1px solid #AFAFAF' }}>
-                                                <thead style={{ backgroundColor: '#f8f9fa' }}>
-                                                    <tr className='text-danger'>
-                                                        <th>Product</th>
-                                                        <th>Details</th>
-                                                        <th>Price</th>
-                                                        <th>Quantity</th>
-                                                        <th>Subtotal</th>
-                                                        <th> </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {cartItems.map(item => {
-                                                        const isCombo = item.variation === null;
-                                                        const detailsLabel = item.variation
-                                                            ? `${item.variation.weight}${item.variation.weightUnit}`
-                                                            : '0';
+                                            <div style={{ overflowX: 'auto' }}>
+                                                <Table responsive style={{ border: '1px solid #AFAFAF', minWidth: '600px' }}>
+                                                    <thead style={{ backgroundColor: '#f8f9fa' }}>
+                                                        <tr className='text-danger'>
+                                                            <th>Product</th>
+                                                            <th>Details</th>
+                                                            <th>Price</th>
+                                                            <th>Quantity</th>
+                                                            <th>Subtotal</th>
+                                                            <th> </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {cartItems.map(item => {
+                                                            const isCombo = item.variation === null;
+                                                            const detailsLabel = item.variation
+                                                                ? `${item.variation.weight}${item.variation.weightUnit}`
+                                                                : '0';
 
-                                                        const unitPrice = item.variation
-                                                            ? item.variation.price
-                                                            : item.product.price;
+                                                            const unitPrice = item.variation
+                                                                ? item.variation.price
+                                                                : item.product.price;
 
-                                                        const rowSubtotal = unitPrice * item.quantity;
+                                                            const rowSubtotal = unitPrice * item.quantity;
 
-                                                        return (
-                                                            <tr key={item.cartItemId}>
-                                                                <td className="align-middle">
-                                                                    <img src={item.product.image} alt={item.product.name} width="60" height="60" style={{ objectFit: 'cover', borderRadius: '8px' }} />
-                                                                </td>
-                                                                <td className="align-middle">{item.product.name}</td>
-                                                                <td className="align-middle">₹{unitPrice}</td>
-                                                                <td className="align-middle">
-                                                                    <Button variant="outline-secondary" size="sm" onClick={() => handleQuantityChange(item.cartItemId, 'decrease')} style={{ border: '1px solid #F02131' }}>-</Button>
-                                                                    <span className="mx-2">{item.quantity}</span>
-                                                                    <Button variant="outline-secondary" size="sm" onClick={() => handleQuantityChange(item.cartItemId, 'increase')} style={{ border: '1px solid #F02131' }}>+</Button>
-                                                                </td>
-                                                                <td className="align-middle">₹{rowSubtotal}</td>
-                                                                <td className="align-middle" style={{ width: '40px' }}>
-                                                                    <Button
-                                                                        variant="link"
-                                                                        onClick={() => handleDeleteFromCart(item.cartItemId)}
-                                                                        className='p-0 text-danger'
-                                                                    >
-                                                                        <FaTrashAlt />
-                                                                    </Button>
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                            </Table>
+                                                            return (
+                                                                <tr key={item.cartItemId}>
+                                                                    <td className="align-middle">
+                                                                        <img
+                                                                            src={item.product.image}
+                                                                            alt={item.product.name}
+                                                                            width="60"
+                                                                            height="60"
+                                                                            style={{ objectFit: 'cover', borderRadius: '8px' }}
+                                                                        />
+                                                                    </td>
+                                                                    <td className="align-middle">{item.product.name}</td>
+                                                                    <td className="align-middle">₹{unitPrice}</td>
+                                                                    <td className="align-middle">
+                                                                        <Button
+                                                                            variant="outline-secondary"
+                                                                            size="sm"
+                                                                            onClick={() => handleQuantityChange(item.cartItemId, 'decrease')}
+                                                                            style={{ border: '1px solid #F02131' }}
+                                                                        >
+                                                                            -
+                                                                        </Button>
+                                                                        <span className="mx-2">{item.quantity}</span>
+                                                                        <Button
+                                                                            variant="outline-secondary"
+                                                                            size="sm"
+                                                                            onClick={() => handleQuantityChange(item.cartItemId, 'increase')}
+                                                                            style={{ border: '1px solid #F02131' }}
+                                                                        >
+                                                                            +
+                                                                        </Button>
+                                                                    </td>
+                                                                    <td className="align-middle">₹{rowSubtotal}</td>
+                                                                    <td className="align-middle" style={{ width: '40px' }}>
+                                                                        <Button
+                                                                            variant="link"
+                                                                            onClick={() => handleDeleteFromCart(item.cartItemId)}
+                                                                            className='p-0 text-danger'
+                                                                        >
+                                                                            <FaTrashAlt />
+                                                                        </Button>
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                </Table>
+                                            </div>
+
                                         </div>
 
                                         <div className="col-md-4">
@@ -661,6 +689,7 @@ export default function CartPage() {
             </section>
             <Cta />
             <Footer />
+            <ToastContainer position="top-right" />
         </>
     );
 }

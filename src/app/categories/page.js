@@ -9,6 +9,9 @@ import { FaArrowRight, FaRegHeart } from "react-icons/fa6";
 import Footer from "@/components/Footer";
 import HomeBanner from "@/components/Banner";
 import HomeMarquee from "@/components/Marquee";
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 export default function Categories() {
     const [categories, setCategories] = useState([]);
@@ -47,7 +50,7 @@ export default function Categories() {
     const toggleWishlist = async (productId) => {
         const token = localStorage.getItem('token');
         if (!token) {
-            alert("Please login to use wishlist");
+            toast.info("Please login to use wishlist");
             return;
         }
 
@@ -76,13 +79,13 @@ export default function Categories() {
     const handleAddToCart = async (product) => {
         const token = localStorage.getItem('token');
         if (!token) {
-            alert("Please login to add to cart");
+            toast.info("Please login to add to cart");
             return;
         }
 
         const variationId = selectedVariations[product._id];
         if (variationId && !mongoose.Types.ObjectId.isValid(variationId)) {
-            alert('Invalid variation selected.');
+            toast.error('Invalid variation selected.');
             return;
         }
 
@@ -106,13 +109,13 @@ export default function Categories() {
             const data = await res.json();
 
             if (res.ok) {
-                alert('Item added to cart!');
+                toast.success('Item added to cart!');
             } else {
-                alert(data.error || 'Failed to add to cart');
+                toast.error(data.error || 'Failed to add to cart');
             }
         } catch (err) {
             console.error('Error adding to cart:', err);
-            alert('Something went wrong');
+            toast.error('Something went wrong');
         }
     };
 
@@ -322,6 +325,7 @@ export default function Categories() {
                 </div>
             </section>
             <Footer />
+            <ToastContainer position="top-right" />
         </>
     );
 }
