@@ -535,31 +535,30 @@ function Header() {
                     />
                 </div>
                 <div className="d-flex align-items-center" style={{ gap: '40px' }}>
-                    {user ? (
-                        <Dropdown align="end">
-                            <Dropdown.Toggle
-                                variant="link"
-                                bsPrefix="p-0 border-0 bg-transparent"
-                                style={{ boxShadow: 'none' }}
-                            >
-                                <FaUser size={18} style={{ color: 'rgb(108, 117, 125)' }} />
-                            </Dropdown.Toggle>
-                            <Dropdown.Menu>
-                                <Dropdown.Item href="/profile">My Profile</Dropdown.Item>
-                                <Dropdown.Divider />
-                                <Dropdown.Item onClick={handleLogout} className="text-danger">Logout</Dropdown.Item>
-                            </Dropdown.Menu>
-                        </Dropdown>
-                    ) : (
-                        <Button
-                            variant="outline-danger"
-                            size="sm"
-                            onClick={() => setShowModal(true)}
-                            className="text-danger"
-                        >
-                            Login / Signup
-                        </Button>
-                    )}
+                    <div onClick={() => {
+                        if (!user) {
+                            setShowModal(true); 
+                        }
+                    }} style={{ cursor: 'pointer' }}>
+                        {user ? (
+                            <Dropdown align="end">
+                                <Dropdown.Toggle
+                                    variant="link"
+                                    bsPrefix="p-0 border-0 bg-transparent"
+                                    style={{ boxShadow: 'none' }}
+                                >
+                                    <FaUser size={18} style={{ color: 'rgb(108, 117, 125)' }} />
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    <Dropdown.Item href="/profile">My Profile</Dropdown.Item>
+                                    <Dropdown.Divider />
+                                    <Dropdown.Item onClick={handleLogout} className="text-danger">Logout</Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        ) : (
+                            <FaUser size={18} style={{ color: 'rgb(108, 117, 125)' }} />
+                        )}
+                    </div>
                     <a href="/cart" className="position-relative text-dark">
                         <FaShoppingCart size={18} style={{ color: 'rgb(108, 117, 125)' }} />
                         {cartItems?.length > 0 && (

@@ -1,12 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import "./HomeCategory.css";
 import Link from 'next/link';
 
 export default function HomeCategory() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+    const scrollRef = useRef(null);
+    const isDragging = useRef(false);
+    const startX = useRef(0);
+    const scrollLeft = useRef(0);
 
     useEffect(() => {
         async function fetchCategories() {
@@ -23,6 +27,28 @@ export default function HomeCategory() {
         fetchCategories();
     }, []);
 
+    const onMouseDown = (e) => {
+        isDragging.current = true;
+        startX.current = e.pageX - scrollRef.current.offsetLeft;
+        scrollLeft.current = scrollRef.current.scrollLeft;
+    };
+
+    const onMouseLeave = () => {
+        isDragging.current = false;
+    };
+
+    const onMouseUp = () => {
+        isDragging.current = false;
+    };
+
+    const onMouseMove = (e) => {
+        if (!isDragging.current) return;
+        e.preventDefault();
+        const x = e.pageX - scrollRef.current.offsetLeft;
+        const walk = (x - startX.current) * 1; // scroll speed
+        scrollRef.current.scrollLeft = scrollLeft.current - walk;
+    };
+
     return (
         <section className="home-categories py-5" style={{ backgroundColor: 'white' }}>
             <div className="container">
@@ -37,7 +63,15 @@ export default function HomeCategory() {
                 {loading ? (
                     <p className="text-center" style={{ color: 'black' }}>Loading categories...</p>
                 ) : (
-                    <div className="d-flex overflow-auto" style={{ gap: '80px' }}>
+                    <div
+                        className="d-flex overflow-auto category-scroll"
+                        style={{ gap: '20px', cursor: isDragging.current ? 'grabbing' : 'grab' }}
+                        ref={scrollRef}
+                        onMouseDown={onMouseDown}
+                        onMouseLeave={onMouseLeave}
+                        onMouseUp={onMouseUp}
+                        onMouseMove={onMouseMove}
+                    >
                         {categories.map((category) => (
                             <div
                                 key={category._id}

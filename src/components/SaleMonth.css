@@ -2,3 +2,11 @@
     font-size: 32px;
     font-weight: bold;
 }
+
+/* media queries */
+
+@media (max-width: 600px) {
+    .shop-now.jsx-ee5f2d208ff72663 {
+        top: 41% !important;
+    }
+}

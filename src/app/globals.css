@@ -105,6 +105,10 @@ a.px-4.nav-link {
     height: 100px !important;
   }
 
+  section.cta.d-flex.align-items-end button {
+    display: none;
+  }
+
   footer.bg-\[\#B80F0A\].text-white.pt-5 {
     text-align: center;
   }

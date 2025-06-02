@@ -82,46 +82,62 @@ export default function ProfilePage() {
                                             <p><strong>Order Status:</strong> {order.order_status}</p>
                                             <p><strong>Payment Status:</strong> {order.payment_status}</p>
 
-                                            <Table bordered size="sm" className="mt-3">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Product</th>
-                                                        <th>Quantity</th>
-                                                        <th>Variation</th>
-                                                        <th>Combo Items</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {orderItems.filter(item => item.order_id === order._id).map(item => (
-                                                        <tr key={item._id}>
-                                                            <td>
-                                                                <img src={item.product.image} alt={item.product.name} width="40" className="me-2" />
-                                                                {item.product.name}
-                                                            </td>
-                                                            <td>{item.quantity}</td>
-                                                            <td>
-                                                                {item.variation ? (
-                                                                    `${item.variation.weight} ${item.variation.unit || ''} - ₹${item.variation.price}`
-                                                                ) : '—'}
-                                                            </td>
-                                                            <td>
-                                                                {item.comboItems.length > 0 ? (
-                                                                    <details>
-                                                                        <summary style={{ cursor: 'pointer' }}>View Items</summary>
-                                                                        <ul className="mb-0 ps-3 mt-2">
-                                                                            {item.comboItems.map((ci, i) => (
-                                                                                <li key={i}>
-                                                                                    {ci.name} - {ci.weight} {ci.unit}
-                                                                                </li>
-                                                                            ))}
-                                                                        </ul>
-                                                                    </details>
-                                                                ) : '—'}
-                                                            </td>
+                                            <div style={{ overflowX: 'auto' }}>
+                                                <Table
+                                                    bordered
+                                                    size="sm"
+                                                    className="mt-3"
+                                                    style={{ minWidth: '600px' }} // 👈 prevents table from squeezing
+                                                >
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Product</th>
+                                                            <th>Quantity</th>
+                                                            <th>Variation</th>
+                                                            <th>Combo Items</th>
                                                         </tr>
-                                                    ))}
-                                                </tbody>
-                                            </Table>
+                                                    </thead>
+                                                    <tbody>
+                                                        {orderItems
+                                                            .filter(item => item.order_id === order._id)
+                                                            .map(item => (
+                                                                <tr key={item._id}>
+                                                                    <td>
+                                                                        <img
+                                                                            src={item.product.image}
+                                                                            alt={item.product.name}
+                                                                            width="40"
+                                                                            className="me-2"
+                                                                        />
+                                                                        {item.product.name}
+                                                                    </td>
+                                                                    <td>{item.quantity}</td>
+                                                                    <td>
+                                                                        {item.variation
+                                                                            ? `${item.variation.weight} ${item.variation.unit || ''} - ₹${item.variation.price}`
+                                                                            : '—'}
+                                                                    </td>
+                                                                    <td>
+                                                                        {item.comboItems.length > 0 ? (
+                                                                            <details>
+                                                                                <summary style={{ cursor: 'pointer' }}>View Items</summary>
+                                                                                <ul className="mb-0 ps-3 mt-2">
+                                                                                    {item.comboItems.map((ci, i) => (
+                                                                                        <li key={i}>
+                                                                                            {ci.name} - {ci.weight} {ci.unit}
+                                                                                        </li>
+                                                                                    ))}
+                                                                                </ul>
+                                                                            </details>
+                                                                        ) : (
+                                                                            '—'
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                    </tbody>
+                                                </Table>
+                                            </div>
                                         </Card.Body>
                                     </Card>
                                 ))

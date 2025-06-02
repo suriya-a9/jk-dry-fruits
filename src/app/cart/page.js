@@ -553,13 +553,21 @@ export default function CartPage() {
             <Header />
             <section className='cartpage bg-white' style={{ color: 'black' }}>
                 <div className="container">
-                    <h2>Your Shopping Cart</h2>
-                    <div className="d-flex align-items-center justify-content-center mb-4">
-                        <StepLabel number={1} label="Shopping Cart" active={step === 1} />
-                        <Arrow />
-                        <StepLabel number={2} label="Checkout" active={step === 2} />
-                        <Arrow />
-                        <StepLabel number={3} label="Order Complete" active={step === 3} />
+                    <h2 style={{margin:'20px 0px'}}>Your Shopping Cart</h2>
+                    <div
+                        className="mb-4"
+                        style={{
+                            overflowX: 'auto',
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        <div className="d-inline-flex align-items-center">
+                            <StepLabel number={1} label="Shopping Cart" active={step === 1} />
+                            <Arrow />
+                            <StepLabel number={2} label="Checkout" active={step === 2} />
+                            <Arrow />
+                            <StepLabel number={3} label="Order Complete" active={step === 3} />
+                        </div>
                     </div>
                     {step === 1 && (
                         <>

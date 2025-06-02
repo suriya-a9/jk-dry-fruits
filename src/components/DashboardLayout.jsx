@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname } from 'next/navigation';
 import { Container, Row, Col, Nav, Navbar, Form, InputGroup, FormControl, Dropdown, Button } from 'react-bootstrap';
+import { FaHeart, FaShoppingCart, FaTrashAlt, FaBars, FaUser } from 'react-icons/fa';
 import { FaUserCircle, FaSearch } from 'react-icons/fa';
 import { useState } from 'react';
 import { signOut } from 'next-auth/react';
@@ -27,7 +28,7 @@ export default function DashboardLayout({ children }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [showDropdown, setShowDropdown] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-
+    const [showMobileSearch, setShowMobileSearch] = useState(false);
     const handleLogout = () => {
         signOut({ callbackUrl: '/admin/login' });
     };
@@ -51,7 +52,7 @@ export default function DashboardLayout({ children }) {
 
     return (
         <Container fluid className="vh-100 p-0" style={{ overflow: 'hidden' }}>
-            <Navbar bg="light" expand="lg" className="px-4 shadow-sm" style={{ height: '70px' }}>
+            <Navbar bg="light" expand="lg" className="px-4 shadow-sm d-none d-lg-flex" style={{ height: '70px' }}>
                 <Navbar.Brand style={{ fontWeight: 'bold' }}>
                     <img src={'/assets/admin/admin-logo.webp'} alt="img" />
                 </Navbar.Brand>
@@ -134,7 +135,100 @@ export default function DashboardLayout({ children }) {
                     </Dropdown.Menu>
                 </Dropdown>
             </Navbar>
+            <div className="d-flex d-lg-none justify-content-between align-items-center px-3 py-2 shadow-sm border-top border-danger position-relative" style={{ height: '70px' }}>
+                <div className="d-flex align-items-center" style={{ gap: '20px' }}>
+                    <FaSearch
+                        size={18}
+                        style={{ cursor: 'pointer', color: 'rgb(108, 117, 125)' }}
+                        onClick={() => setShowMobileSearch(prev => !prev)}
+                    />
+                    {showMobileSearch && (
+                        <div className="position-absolute w-100 start-0 mt-1 px-3" style={{ zIndex: 1050 }}>
+                            <Form className="position-relative" onSubmit={handleSearch}>
+                                <InputGroup style={{ backgroundColor: '#f1f1f1' }}>
+                                    <FormControl
+                                        type="search"
+                                        placeholder="Search Your Product"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
+                                        style={{
+                                            backgroundColor: '#FFFFFF',
+                                            border: '1px solid #F02131',
+                                            color: '#F02131'
+                                        }}
+                                    />
+                                    <InputGroup.Text style={{ backgroundColor: '#FFFFFF', border: '1px solid #F02131', color: '#F02131' }}>
+                                        <Button
+                                            style={{
+                                                backgroundColor: '#FFFFFF',
+                                                border: 'none',
+                                                color: '#F02131'
+                                            }}
+                                            type="submit"
+                                        >
+                                            <FaSearch />
+                                        </Button>
+                                    </InputGroup.Text>
+                                </InputGroup>
 
+                                {showDropdown && searchResults.length > 0 && (
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            top: '100%',
+                                            left: 0,
+                                            width: '100%',
+                                            backgroundColor: 'white',
+                                            zIndex: 1000,
+                                            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+                                            maxHeight: '300px',
+                                            overflowY: 'auto',
+                                            border: '1px solid #ddd',
+                                            borderTop: 'none',
+                                        }}
+                                    >
+                                        {searchResults.map((product) => (
+                                            <div
+                                                key={product._id}
+                                                style={{
+                                                    padding: '10px',
+                                                    cursor: 'pointer',
+                                                    borderBottom: '1px solid #f1f1f1',
+                                                    color: 'black'
+                                                }}
+                                                onClick={() => {
+                                                    router.push(`/admin/dashboard/products/${product._id}`);
+                                                    setShowDropdown(false);
+                                                    setSearchTerm('');
+                                                    setShowMobileSearch(false); // Hide on select
+                                                }}
+                                            >
+                                                <strong>{product.name}</strong>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </Form>
+                        </div>
+                    )}
+
+                </div>
+
+                <div className="position-absolute top-50 start-50 translate-middle">
+                    <img src="/assets/admin/admin-logo.webp" alt="Logo" height="30" />
+                </div>
+
+                <Dropdown align="end">
+                    <Dropdown.Toggle variant="light" style={{ color: '#F02131', border: '1px solid #F02131', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around' }}>
+                        <FaUserCircle style={{ marginRight: 6 }} />
+                        Admin
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                        <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+                    </Dropdown.Menu>
+                </Dropdown>
+            </div>
             <Row className="h-100">
                 <Col xs={2} className="bg-light p-0 border-end">
                     <Nav defaultActiveKey="/admin/dashboard" className="flex-column pt-4">
