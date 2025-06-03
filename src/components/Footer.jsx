@@ -13,7 +13,7 @@ export default function Footer() {
                         Morbi cursus porttitor enim lobortis molestie. Duis gravida turpis dui, eget bibendum magna congue nec.
                     </p>
                     <div className="flex gap-2 flex-wrap">
-                        <span className="bg-[#D2B87A] text-black px-2 py-1 rounded text-sm">(219) 555-0114</span>
+                        <span className="bg-[#D2B87A] text-black px-2 py-1 rounded text-sm">+91 8667520327</span>
                         <span>or</span>
                         <span className="bg-[#D2B87A] text-black px-2 py-1 rounded text-sm">Proxy@gmail.com</span>
                     </div>

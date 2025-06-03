@@ -308,7 +308,7 @@ function Header() {
 
     return (
         <>
-            <Navbar expand="lg" className="bg-body-tertiary d-none d-md-flex">
+            <Navbar expand="lg" className="bg-body-tertiary d-none d-md-flex" id='web-navbar'>
                 <Container>
                     <Navbar.Brand href="/">
                         <img src={'/assets/admin/admin-logo.webp'} alt="Logo" height="40" />
@@ -443,7 +443,7 @@ function Header() {
                     </Navbar.Collapse>
                 </Container>
             </Navbar>
-            <div className="d-flex d-lg-none justify-content-between align-items-center px-3 py-2 shadow-sm border-top border-danger position-relative" style={{ height: '100px' }}>
+            <div className="d-flex d-lg-none justify-content-between align-items-center px-3 py-2 shadow-sm border-top border-danger position-relative" id='mobile-navbar' style={{ height: '100px' }}>
 
                 <div className="d-flex align-items-center" style={{ gap: '25px' }}>
                     <button

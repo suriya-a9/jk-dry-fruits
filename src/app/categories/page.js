@@ -172,7 +172,7 @@ export default function Categories() {
             <section className="categories bg-white" id="oderProducts" style={{ margin: '40px 0px' }}>
                 <div className="container">
                     <div className="row">
-                        <div className="d-md-none mb-3 position-relative">
+                        <div className="d-custom-none mb-3 position-relative">
                             <div
                                 ref={scrollRef}
                                 className="d-flex overflow-auto gap-2 px-2 no-scrollbar"
@@ -223,7 +223,7 @@ export default function Categories() {
                             )}
                         </div>
 
-                        <div className="d-none d-md-block col-md-3">
+                        <div className="d-none d-custom-block col-md-3">
                             <div className="p-3 border-end">
                                 <h5 className="fw-bold text-white bg-danger" style={{ padding: '30px 10px' }}>Categories</h5>
 
@@ -254,7 +254,7 @@ export default function Categories() {
                             <div className="flex-grow-1 p-3">
                                 <div className="row">
                                     {filteredProducts.slice(0, visibleCount).map((product, index) => (
-                                        <div key={product._id || index} className="col-12 col-md-4 mb-4">
+                                        <div key={product._id || index} className="col-12 col-md-4 mb-4 custom-col">
                                             <div className="card text-center h-100 rounded-4 product-card visible" style={{ alignItems: 'center', borderBottom: '3px solid black', boxShadow: 'rgba(0,0,0,0.24) 0px 3px 8px' }}>
                                                 <div className="w-100 d-flex justify-content-between align-items-center px-3 pt-3">
                                                     <span className="badge bg-warning text-dark">New</span>

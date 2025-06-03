@@ -7,9 +7,11 @@ import { useEffect, useState } from 'react';
 import { Card, Button, Table, Modal, Form } from 'react-bootstrap';
 import { FaTrashAlt } from 'react-icons/fa';
 import { QRCodeCanvas } from 'qrcode.react';
+import { TbHandFingerDown } from "react-icons/tb";
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import { toast } from 'react-toastify';
+import Link from 'next/link';
 
 function CheckoutStep({ subtotal, deliveryCharge, totalAmount, onBack, onPlaceOrder, discountOnOrder }) {
     const [showQR, setShowQR] = useState(false);
@@ -164,7 +166,7 @@ function CheckoutStep({ subtotal, deliveryCharge, totalAmount, onBack, onPlaceOr
     const adjustedTotalAmount = subtotal + adjustedDeliveryCharge;
 
 
-    const upiId = '6384820056@kotak811';
+    const upiId = 'jeyjay7-2@okicici';
     const upiAmount = finalAmount.toFixed(2);
     // const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(fullName)}&am=${upiAmount}&cu=INR`;
     const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(fullName || 'Recipient')}&am=${upiAmount}&cu=INR&tn=Order%20Payment`;
@@ -303,9 +305,18 @@ function CheckoutStep({ subtotal, deliveryCharge, totalAmount, onBack, onPlaceOr
                 </Modal.Header> */}
                 <Modal.Body className='text-center' style={{ placeItems: 'center' }}>
                     <p>Scan the QR code below to pay ₹{upiAmount}</p>
-                    <p>
+                    {/* <p>
                         or Pay to this UPI ID <strong style={{ cursor: 'pointer' }} onClick={() => handleCopy(upiId)}>{upiId}&nbsp;</strong><span style={{ cursor: 'pointer' }} onClick={() => handleCopy(upiId)}>(click to copy!)</span>
-                    </p>
+                    </p> */}
+                    <p style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>or Pay via UPI APP <TbHandFingerDown size={26} style={{ color: '#EF2231' }} /></p>
+                    <Button
+                        className="mb-2"
+                        onClick={() => window.location.href = upiUrl}
+                        style={{ background: '#EF2231', color: 'white', border: '1px solid #EF2231' }}
+                    >
+                        Open UPI App
+                    </Button>
+
                     <QRCodeCanvas value={upiUrl} />
                     <Form.Group className="mt-3">
                         <Form.Label>Enter UPI Transaction ID</Form.Label>
@@ -553,7 +564,7 @@ export default function CartPage() {
             <Header />
             <section className='cartpage bg-white' style={{ color: 'black' }}>
                 <div className="container">
-                    <h2 style={{margin:'20px 0px'}}>Your Shopping Cart</h2>
+                    <h2 style={{ margin: '20px 0px' }}>Your Shopping Cart</h2>
                     <div
                         className="mb-4"
                         style={{
@@ -720,7 +731,7 @@ function OrderCompleteStep() {
             <h3 className='text-success'>🎉 Order Placed Successfully!</h3>
             <p>Thank you for your purchase. Your order is on its way.</p>
             {/* <Button variant='danger' href='/'>Return Home</Button> */}
-            <a href='/' style={{ textDecoration: 'none', color: '#F02131' }}>Continue Shopping {">"}</a>
+            <Link href='/' style={{ textDecoration: 'none', color: '#F02131' }}>Continue Shopping {">"}</Link >
         </Card>
     );
 }

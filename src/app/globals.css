@@ -91,6 +91,10 @@ a.px-4.nav-link {
     justify-content: center;
   }
 
+  #web-navbar {
+    display: none !important;
+  }
+
   .sale-image.jsx-ee5f2d208ff72663 {
     position: relative;
     width: 100% !important;
@@ -145,4 +149,74 @@ a.px-4.nav-link {
   /* IE/Edge */
   scrollbar-width: none;
   /* Firefox */
+}
+
+@media(min-width: 601px) and (max-width:900px) {
+  #web-navbar {
+    display: none !important;
+  }
+
+  #mobile-navbar .d-flex.align-items-center {
+    gap: 90px !important;
+  }
+
+  .home-banner-caption {
+    background-color: rgba(244, 236, 225, 0.5);
+    width: 100% !important;
+    padding: 40px;
+  }
+
+  .shadow-sm.card {
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none;
+  }
+
+  .badge.position-absolute {
+    display: none !important;
+  }
+
+  .shadow-sm.card button {
+    width: 80% !important;
+  }
+
+  .shadow-sm.card h5 {
+    font-size: 16px !important;
+    height: 25px;
+  }
+
+  .shop-now.jsx-ee5f2d208ff72663 {
+    top: 60% !important;
+    width: 150px !important;
+  }
+}
+
+@media (max-width: 899px) {
+  .d-custom-none {
+    display: block !important;
+  }
+
+  .d-custom-block {
+    display: none !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .d-custom-none {
+    display: none !important;
+  }
+
+  .d-custom-block {
+    display: block !important;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+  .custom-col {
+    width: 100% !important;
+    flex: 0 0 90% !important;
+    max-width: 100% !important;
+    justify-content: center;
+    align-items: center;
+  }
 }
