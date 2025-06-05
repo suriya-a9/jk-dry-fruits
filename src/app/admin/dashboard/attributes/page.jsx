@@ -5,6 +5,9 @@ import { useEffect, useState } from 'react';
 import {
     Table, Button, Modal, Form, Row, Col, Spinner
 } from 'react-bootstrap';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 export default function AttributesPage() {
     const [attributes, setAttributes] = useState([]);
@@ -38,11 +41,16 @@ export default function AttributesPage() {
             body: JSON.stringify(form),
         });
 
+        const result = await res.json();
+
         if (res.ok) {
+            toast.success(result.message || 'Saved successfully');
             fetchAttributes();
             setShowModal(false);
             setEditId(null);
             setForm({ label: '' });
+        } else {
+            toast.error(result.error || 'Something went wrong');
         }
     };
 
@@ -58,11 +66,13 @@ export default function AttributesPage() {
                 method: 'DELETE',
             });
 
+            const result = await res.json();
+
             if (res.ok) {
+                toast.success(result.message || 'Deleted successfully');
                 fetchAttributes();
             } else {
-                const result = await res.json();
-                alert(result.error || 'Something went wrong');
+                toast.error(result.error || 'Something went wrong');
             }
         }
     };
@@ -126,6 +136,7 @@ export default function AttributesPage() {
                     </Modal.Footer>
                 </Modal>
             </DashboardLayout>
+            <ToastContainer position="top-right" autoClose={3000} />
         </>
     );
 }

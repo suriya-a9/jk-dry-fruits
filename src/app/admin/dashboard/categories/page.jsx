@@ -2,6 +2,8 @@
 
 import DashboardLayout from '@/components/DashboardLayout';
 import { useEffect, useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { Table, Button, Modal, Form, Row, Col, Spinner } from 'react-bootstrap';
 
 export default function CategoriesPage() {
@@ -31,12 +33,18 @@ export default function CategoriesPage() {
             body: JSON.stringify({ name }),
         });
 
-        if (res.ok) {
-            setModalShow(false);
-            setName('');
-            setEditId(null);
-            fetchCategories();
+        const result = await res.json();
+
+        if (!res.ok) {
+            toast.error(result.error || 'Something went wrong');
+            return;
         }
+
+        toast.success(result.message || (editId ? 'Category updated' : 'Category added'));
+        setModalShow(false);
+        setName('');
+        setEditId(null);
+        fetchCategories();
     };
 
     const handleEdit = (category) => {
@@ -47,8 +55,19 @@ export default function CategoriesPage() {
 
     const handleDelete = async (id) => {
         if (confirm('Are you sure?')) {
-            await fetch(`/api/admin/category/${id}`, { method: 'DELETE' });
-            fetchCategories();
+            try {
+                const res = await fetch(`/api/admin/category/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+
+                if (res.ok) {
+                    toast.success(data.message || 'Category deleted');
+                    fetchCategories();
+                } else {
+                    toast.error(data.error || 'Failed to delete category');
+                }
+            } catch (error) {
+                toast.error('Something went wrong');
+            }
         }
     };
 
@@ -103,6 +122,7 @@ export default function CategoriesPage() {
                     </Modal.Footer>
                 </Modal>
             </DashboardLayout>
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
         </>
     );
 }

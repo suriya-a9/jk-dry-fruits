@@ -220,3 +220,9 @@ a.px-4.nav-link {
     align-items: center;
   }
 }
+
+@media(min-width: 901px) and (max-width: 1367px) {
+  .shop-now.jsx-ee5f2d208ff72663 {
+    top: 35% !important;
+  }
+}

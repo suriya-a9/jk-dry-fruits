@@ -74,7 +74,7 @@ export default function DashboardHome() {
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col>
+                {/* <Col>
                     <Card className="shadow-sm">
                         <Card.Body className="d-flex align-items-center" style={{ justifyContent: 'start', gap: '30px' }}>
                             <FaShoppingCart size={40} className="text-warning me-3" />
@@ -84,7 +84,7 @@ export default function DashboardHome() {
                             </div>
                         </Card.Body>
                     </Card>
-                </Col>
+                </Col> */}
                 <Col>
                     <Card className="shadow-sm">
                         <Card.Body className="d-flex flex-column">

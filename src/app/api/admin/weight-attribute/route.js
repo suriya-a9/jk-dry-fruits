@@ -12,17 +12,20 @@ export async function POST(req) {
     await connectDB();
     const { label } = await req.json();
 
-    if (!label) {
-        return NextResponse.json({ message: 'Label is required' }, { status: 400 });
+    if (!label || typeof label !== 'string' || !label.trim()) {
+        return NextResponse.json({ error: 'Label is required' }, { status: 400 });
     }
 
-    const exists = await WeightAttribute.findOne({ label });
+    const exists = await WeightAttribute.findOne({ label: label.trim() });
     if (exists) {
-        return NextResponse.json({ message: 'Attribute already exists' }, { status: 409 });
+        return NextResponse.json({ error: 'Attribute already exists' }, { status: 409 });
     }
 
-    const newAttr = new WeightAttribute({ label });
+    const newAttr = new WeightAttribute({ label: label.trim() });
     await newAttr.save();
 
-    return NextResponse.json({ message: 'Attribute created', attribute: newAttr }, { status: 201 });
+    return NextResponse.json(
+        { message: 'Attribute created successfully', attribute: newAttr },
+        { status: 201 }
+    );
 }

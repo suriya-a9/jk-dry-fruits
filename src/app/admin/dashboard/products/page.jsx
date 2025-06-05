@@ -5,6 +5,9 @@ import { useEffect, useState } from 'react';
 import {
     Table, Button, Modal, Form, Row, Col, InputGroup, Spinner
 } from 'react-bootstrap';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState([]);
@@ -12,7 +15,8 @@ export default function ProductsPage() {
     const [attributes, setAttributes] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [loading, setLoading] = useState(true);
-
+    const [searchTerm, setSearchTerm] = useState('');
+    const [stockFilter, setStockFilter] = useState('all');
 
     const [editId, setEditId] = useState(null);
     const [form, setForm] = useState({
@@ -93,22 +97,50 @@ export default function ProductsPage() {
         const updated = form.variations.filter((_, i) => i !== index);
         setForm(prev => ({ ...prev, variations: updated }));
     };
+    const filteredProducts = products.filter(p => {
+        const nameMatch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const categoryMatch = p.category?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+        const priceMatch = p.variations?.some(v =>
+            v.price?.toString().includes(searchTerm)
+        );
+
+        const stockMatch =
+            stockFilter === 'all'
+                ? true
+                : stockFilter === 'in'
+                    ? p.inStock
+                    : !p.inStock;
+
+        return (nameMatch || categoryMatch || priceMatch) && stockMatch;
+    });
 
     const handleSave = async () => {
         const method = editId ? 'PUT' : 'POST';
         const url = editId ? `/api/admin/product/${editId}` : '/api/admin/product';
-        console.log('Submitting form:', form);
-        const res = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(form),
-        });
 
-        if (res.ok) {
-            setShowModal(false);
-            setForm({ name: '', image: '', category: '', weightUnit: '', comboItems: [], variations: [] });
-            setEditId(null);
-            fetchData();
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(form),
+            });
+
+            const result = await res.json();
+
+            if (res.ok) {
+                toast.success(result.message || 'Product saved successfully');
+                setShowModal(false);
+                setForm({
+                    name: '', image: '', category: '', weightUnit: '',
+                    comboItems: [], variations: []
+                });
+                setEditId(null);
+                fetchData();
+            } else {
+                toast.error(result.error || 'Failed to save product');
+            }
+        } catch (error) {
+            toast.error('An error occurred while saving');
         }
     };
 
@@ -142,37 +174,50 @@ export default function ProductsPage() {
 
     const handleDelete = async (id) => {
         if (confirm('Are you sure?')) {
-            await fetch(`/api/admin/product/${id}`, { method: 'DELETE' });
-            fetchData();
+            try {
+                const res = await fetch(`/api/admin/product/${id}`, { method: 'DELETE' });
+                const result = await res.json();
+
+                if (res.ok) {
+                    toast.success(result.message || 'Product deleted successfully');
+                    fetchData();
+                } else {
+                    toast.error(result.error || 'Failed to delete product');
+                }
+            } catch (error) {
+                toast.error('An error occurred while deleting');
+            }
         }
     };
 
     const toggleStockStatus = async (id, newStatus) => {
-        
         const product = products.find(p => p._id === id);
         if (!product) return;
 
-        
         const updatedData = {
             ...product,
             inStock: newStatus,
         };
 
-        
-        const res = await fetch(`/api/admin/product/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedData),
-        });
+        try {
+            const res = await fetch(`/api/admin/product/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedData),
+            });
 
-        if (res.ok) {
-            fetchData(); 
-        } else {
-            alert('Failed to update stock status.');
+            const result = await res.json();
+
+            if (res.ok) {
+                toast.success('Stock status updated');
+                fetchData();
+            } else {
+                toast.error(result.error || 'Failed to update stock status');
+            }
+        } catch (error) {
+            toast.error('An error occurred while updating stock status');
         }
     };
-
-    
 
     return (
         <>
@@ -187,7 +232,23 @@ export default function ProductsPage() {
                         }} style={{ backgroundColor: 'rgb(240, 33, 49)', border: 'none', }}>+ Add Product</Button>
                     </Col>
                 </Row>
-
+                <Row className="mb-3">
+                    <Col md={6}>
+                        <Form.Control
+                            type="text"
+                            placeholder="Search by name, category, or price"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </Col>
+                    <Col md={4}>
+                        <Form.Select value={stockFilter} onChange={(e) => setStockFilter(e.target.value)}>
+                            <option value="all">All Stock Status</option>
+                            <option value="in">In Stock</option>
+                            <option value="out">Out of Stock</option>
+                        </Form.Select>
+                    </Col>
+                </Row>
                 <Table striped bordered hover style={{ paddingBottom: '45px' }}>
                     <thead>
                         <tr>
@@ -201,7 +262,7 @@ export default function ProductsPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        {products.map((p, i) => (
+                        {filteredProducts.map((p, i) => (
                             <tr key={p._id}>
                                 <td>{i + 1}</td>
                                 <td>{p.name}</td>
@@ -241,6 +302,7 @@ export default function ProductsPage() {
                                 </td>
                             </tr>
                         ))}
+
                     </tbody>
                 </Table>
 
@@ -417,6 +479,7 @@ export default function ProductsPage() {
                     </Modal.Footer>
                 </Modal>
             </DashboardLayout>
+            <ToastContainer position="top-right" autoClose={3000} />
         </>
     );
 }
